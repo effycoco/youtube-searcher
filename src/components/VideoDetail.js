@@ -1,6 +1,6 @@
 import React from "react";
 const VideoDetail = ({ video }) => {
-  if (!video) return "Loading...";
+  if (!video) return;
   // 作用： 如果不加这一行，当还未搜索及还未从api取得数据时，video=null,试图读取其property会报错
   return (
     <div>

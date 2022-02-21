@@ -6,11 +6,14 @@ import youtube from "../apis/youtube";
 
 class App extends React.Component {
   state = { videos: [], selectedVideo: null };
-  defaultSearch = "cats";
+  defaultSearch = "";
+
   componentDidMount() {
+    // 初次渲染时，用默认搜索词向api发出请求
     this.handleSearchBarSubmit(this.defaultSearch);
   }
   handleSearchBarSubmit = async (term) => {
+    if (!term.trim().length) return; // 不搜索空字符串
     const response = await youtube.get("/search", {
       params: {
         q: term,
