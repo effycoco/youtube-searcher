@@ -1,58 +1,48 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import SearchBar from "./SeachBar";
 import VideoDetail from "./VideoDetail";
 import VideoList from "./VideoList";
 import youtube from "../apis/youtube";
+const App = () => {
+  const [videos, setVideos] = useState([]);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const defaultSearch = "";
 
-class App extends React.Component {
-  state = { videos: [], selectedVideo: null };
-  defaultSearch = "";
-
-  componentDidMount() {
+  useEffect(() => {
     // 初次渲染时，用默认搜索词向api发出请求
-    this.handleSearchBarSubmit(this.defaultSearch);
-  }
-  handleSearchBarSubmit = async (term) => {
-    if (!term.trim().length) return; // 不搜索空字符串
+    handleSearchBarSubmit(defaultSearch);
+  }, []);
+
+  const handleSearchBarSubmit = async (term) => {
+    if (!term.trim().length) return;
     const response = await youtube.get("/search", {
       params: {
         q: term,
       },
     });
-    // console.log(response); // 显示获取的数据
-    // 根据response object的结构可知，我们关心的信息都在response.data.items里
-    // 将其添加为App组件的一个state,由于items是array,所以将其初始值设为empty array
-    this.setState({
-      videos: response.data.items,
-      selectedVideo: response.data.items[0],
-    }); // 一旦取得api返回的数据就更新
+    setVideos(response.data.items);
+    setSelectedVideo(response.data.items[0]);
   };
-  handleVideoSelect = (video) => {
-    // console.log("From the App!", video);
-    this.setState({ selectedVideo: video });
+  const handleVideoSelect = (video) => {
+    setSelectedVideo(video);
   };
-  render() {
-    return (
-      <div className="ui container">
-        <SearchBar
-          onSearchBarSubmit={this.handleSearchBarSubmit}
-          defaultSearch={this.defaultSearch}
-        />
-        <div className="ui stackable grid">
-          <div className="ui row">
-            <div className="eleven wide column">
-              <VideoDetail video={this.state.selectedVideo} />
-            </div>
-            <div className="five wide column ">
-              <VideoList
-                onVideoSelect={this.handleVideoSelect}
-                videos={this.state.videos}
-              />
-            </div>
+  return (
+    <div className="ui container">
+      <SearchBar
+        onSearchBarSubmit={handleSearchBarSubmit}
+        defaultSearch={defaultSearch}
+      />
+      <div className="ui stackable grid">
+        <div className="ui row">
+          <div className="eleven wide column">
+            <VideoDetail video={selectedVideo} />
+          </div>
+          <div className="five wide column ">
+            <VideoList onVideoSelect={handleVideoSelect} videos={videos} />
           </div>
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 export default App;
